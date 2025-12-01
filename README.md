@@ -108,14 +108,30 @@ Your submission will be evaluated based on:
 
 1. **Generate Your Data**: Follow [HOW_TO_GENERATE_DATA.md](./HOW_TO_GENERATE_DATA.md) to create your unique dataset
 2. **Study Event Types**: Review [FLEET_TRACKING_EVENT_TYPES.md](./FLEET_TRACKING_EVENT_TYPES.md) to understand the data structure
-3. **Plan Your Dashboard**: Design your approach for real-time visualization and event processing
-4. **Build & Deploy**: Implement your solution and deploy to a hosting platform
+3. **Set Up Project**: Follow [SETUP_GUIDE.md](./SETUP_GUIDE.md) for complete setup instructions
+4. **Environment Variables**: See [ENV_SETUP_SUMMARY.md](./ENV_SETUP_SUMMARY.md) for environment variable configuration
+5. **Plan Your Dashboard**: Design your approach for real-time visualization and event processing
+6. **Build & Deploy**: Implement your solution and deploy to a hosting platform
 
 ---
 
-**Ready to build your fleet tracking dashboard? Start by generating your unique assessment data!**
+## Project Structure
 
-📖 **Next Step**: [HOW_TO_GENERATE_DATA.md](./HOW_TO_GENERATE_DATA.md)
+This repository contains:
+
+- **`data/trips/`** - Generated trip data (5 JSON files)
+- **`backend/`** - Node.js + Express API server
+- **`frontend/`** - React + Vite dashboard application
+- **Documentation** - Setup guides and environment variable references
+
+**📖 Quick Start**: [SETUP_GUIDE.md](./SETUP_GUIDE.md)  
+**🔧 Environment Setup**: [ENV_SETUP_SUMMARY.md](./ENV_SETUP_SUMMARY.md)
+
+---
+
+**Ready to build your fleet tracking dashboard!**
+
+📖 **Next Step**: [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 
 ### AI and LLM Usage
 
