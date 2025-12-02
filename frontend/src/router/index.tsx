@@ -1,32 +1,37 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import LoginPage from '../pages/LoginPage';
-import RegisterPage from '../pages/RegisterPage';
-import DashboardPage from '../pages/DashboardPage';
-import ProfilePage from '../pages/ProfilePage';
-import SettingsPage from '../pages/SettingsPage';
-import TermsPage from '../pages/TermsPage';
-import ForgotPasswordPage from '../pages/ForgotPasswordPage';
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import LandingPage from "../pages/LandingPage";
+import LoginPage from "../pages/LoginPage";
+import RegisterPage from "../pages/RegisterPage";
+import DashboardPage from "../pages/DashboardPage";
+import ProfilePage from "../pages/ProfilePage";
+import SettingsPage from "../pages/SettingsPage";
+import TermsPage from "../pages/TermsPage";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const accessToken = localStorage.getItem('accessToken');
+  const accessToken = localStorage.getItem("accessToken");
   return accessToken ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 export const router = createBrowserRouter([
   {
-    path: '/login',
+    path: "/",
+    element: <LandingPage />,
+  },
+  {
+    path: "/login",
     element: <LoginPage />,
   },
   {
-    path: '/register',
+    path: "/register",
     element: <RegisterPage />,
   },
   {
-    path: '/forgot-password',
+    path: "/forgot-password",
     element: <ForgotPasswordPage />,
   },
   {
-    path: '/dashboard',
+    path: "/dashboard",
     element: (
       <PrivateRoute>
         <DashboardPage />
@@ -34,7 +39,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/profile',
+    path: "/profile",
     element: (
       <PrivateRoute>
         <ProfilePage />
@@ -42,7 +47,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/settings',
+    path: "/settings",
     element: (
       <PrivateRoute>
         <SettingsPage />
@@ -50,12 +55,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/terms',
+    path: "/terms",
     element: <TermsPage />,
   },
-  {
-    path: '/',
-    element: <Navigate to="/dashboard" replace />,
-  },
 ]);
-

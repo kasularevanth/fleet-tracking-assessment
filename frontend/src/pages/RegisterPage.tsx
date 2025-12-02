@@ -67,15 +67,11 @@ const RegisterPage = () => {
     }
   };
 
-  // Initialize Google Sign-In on component mount
+  // Initialize Google Sign-In
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+    if (!clientId || !googleButtonRef.current) return;
 
-    if (!clientId || !googleButtonRef.current) {
-      return;
-    }
-
-    // Wait for Google Identity Services to load
     const initGoogleSignIn = () => {
       if (
         typeof window !== "undefined" &&
@@ -99,8 +95,7 @@ const RegisterPage = () => {
               navigate("/dashboard");
             } catch (err: any) {
               setError(
-                err.response?.data?.error ||
-                  "Google registration failed. Please try again."
+                err.response?.data?.error || "Google registration failed."
               );
             } finally {
               setLoading(false);
@@ -108,7 +103,6 @@ const RegisterPage = () => {
           },
         });
 
-        // Render the button with custom styling
         (window.google.accounts.id as any).renderButton(
           googleButtonRef.current,
           {
@@ -117,211 +111,215 @@ const RegisterPage = () => {
             size: "large",
             text: "signup_with",
             width: "100%",
-            shape: "rectangular",
           }
         );
-
-        // Disable One Tap prompt - only show popup on button click
         (window.google.accounts.id as any).disableAutoSelect();
       }
     };
 
-    // Check if Google is already loaded
     if (window.google) {
       initGoogleSignIn();
     } else {
-      // Wait for script to load
       const checkInterval = setInterval(() => {
         if (window.google) {
           clearInterval(checkInterval);
           initGoogleSignIn();
         }
       }, 100);
-
-      // Timeout after 5 seconds
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        if (!window.google) {
-          console.error("Google Identity Services failed to load");
-        }
-      }, 5000);
+      setTimeout(() => clearInterval(checkInterval), 5000);
     }
   }, [navigate, setAuth]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
+    <div className="min-h-screen flex overflow-hidden">
+      {/* Left Side - Image/Visual */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gray-900">
+        <img
+          src="https://www.wilmarinc.com/hs-fs/hubfs/AdobeStock_320335514-1.jpeg?width=900&name=AdobeStock_320335514-1.jpeg"
+          alt="Fleet Tracking"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/80 via-pink-900/70 to-indigo-900/80"></div>
+        <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
+          >
+            <h2 className="text-4xl font-bold mb-4">Join FleetTrack!</h2>
+            <p className="text-xl text-purple-100 mb-8">
+              Start tracking your fleet today and transform your operations
+            </p>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Right Side - Registration Form - No Scroll */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 bg-gray-50 overflow-hidden">
         <motion.div
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring" }}
-          className="bg-white rounded-2xl shadow-2xl p-8 space-y-6"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
         >
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.3, type: "spring" }}
-              className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full mx-auto flex items-center justify-center"
-            >
-              <svg
-                className="w-8 h-8 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-4 max-h-[90vh] ">
+            {/* Header */}
+            <div className="text-center space-y-2">
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-sm font-semibold text-indigo-600 uppercase tracking-wide"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                Get Started
+              </motion.p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Create Account
+              </h1>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs"
+              >
+                {error}
+              </motion.div>
+            )}
+
+            {/* Google Register */}
+            <div
+              ref={googleButtonRef}
+              className="w-full flex justify-center"
+            ></div>
+
+            {/* Divider */}
+            <div className="relative py-1">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-2 bg-white text-gray-500">
+                  Or sign up with email
+                </span>
+              </div>
+            </div>
+
+            {/* Registration Form */}
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-1.5 font-poppins"
+                >
+                  Full Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none text-sm"
+                  placeholder="John Doe"
                 />
-              </svg>
-            </motion.div>
-            <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
-            <p className="text-gray-600">Join us to track your fleet</p>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-1.5 font-poppins"
+                >
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  required
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none text-sm"
+                  placeholder="you@example.com"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1.5 font-poppins"
+                >
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  required
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none text-sm"
+                  placeholder="••••••••"
+                />
+                <p className="text-xs text-gray-500 mt-0.5 leading-tight">
+                  8+ chars: uppercase, lowercase, number, special char
+                </p>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 mb-1.5 font-poppins"
+                >
+                  Confirm Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
+                  required
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none text-sm"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-sm"
+              >
+                {loading ? "Creating Account..." : "Create Account"}
+              </motion.button>
+            </form>
+
+            {/* Sign In Link */}
+            <p className="text-center text-xs text-gray-600 pt-2">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-purple-600 font-semibold hover:text-purple-700"
+              >
+                Sign in
+              </Link>
+            </p>
           </div>
-
-          {/* Error Message */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
-            >
-              {error}
-            </motion.div>
-          )}
-
-          {/* Google Register Button - Rendered by Google */}
-          <div
-            ref={googleButtonRef}
-            className="google-signin-button w-full flex justify-center"
-          ></div>
-
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
-                Or sign up with email
-              </span>
-            </div>
-          </div>
-
-          {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Full Name
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                placeholder="John Doe"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                placeholder="you@example.com"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) =>
-                  setFormData({ ...formData, confirmPassword: e.target.value })
-                }
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-            >
-              {loading ? "Creating Account..." : "Create Account"}
-            </motion.button>
-          </form>
-
-          {/* Sign In Link */}
-          <p className="text-center text-sm text-gray-600">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-purple-600 font-semibold hover:text-purple-700 transition-colors"
-            >
-              Sign in
-            </Link>
-          </p>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 };
