@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Fade, Zoom } from 'react-awesome-reveal';
 import { authApi } from '../services/authApi';
-import { useAuthStore } from '../store/authStore';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
