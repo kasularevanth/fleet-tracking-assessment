@@ -2,26 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fleet Tracking Dashboard</title>
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
-      // Prevent redirect loops - if URL has /index.html, clean it up
-      if (window.location.pathname.includes("/index.html")) {
-        const cleanPath =
-          window.location.pathname.replace(/\/index\.html.*$/, "") || "/";
-        window.history.replaceState(
-          {},
-          "",
-          cleanPath + window.location.search + window.location.hash
-        );
+      // Fallback: If rewrite rule isn't working, redirect to root
+      // The rewrite rule should prevent this file from ever being served
+      // If you see this, the rewrite rule is not configured correctly in Render
+      const path =
+        window.location.pathname.replace(/\/index\.html.*$/, "") || "/";
+      const search = window.location.search;
+      const hash = window.location.hash;
+
+      // Store path for React Router to handle
+      if (path !== "/") {
+        sessionStorage.setItem("redirectPath", path);
       }
+
+      // Load the actual app from root
+      window.location.replace("/" + search + hash);
     </script>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <p>Redirecting...</p>
   </body>
 </html>

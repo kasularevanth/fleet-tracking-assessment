@@ -12,6 +12,21 @@ const AppInitializer = () => {
   const accessToken = useAuthStore((state) => state.accessToken);
 
   useEffect(() => {
+    // Handle redirect from 404.html fallback (if rewrite rule isn't working)
+    const redirectPath = sessionStorage.getItem("redirectPath");
+    if (redirectPath && redirectPath !== window.location.pathname) {
+      sessionStorage.removeItem("redirectPath");
+      // Navigate to the stored path - React Router will handle it
+      window.history.replaceState(
+        {},
+        "",
+        redirectPath + window.location.search + window.location.hash
+      );
+      // Force a reload to let React Router handle the route
+      window.location.reload();
+      return;
+    }
+
     // Check if we have tokens and refresh if needed on app load
     if (refreshToken && accessToken) {
       // Try to refresh token on app load to ensure it's valid
