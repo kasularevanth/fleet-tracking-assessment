@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getTripEvents, getTripById } from '../services/eventLoaderService';
-import { Event } from '../models/Event';
+import { Event, TripRuntime } from '../models/Event';
 import { authMiddleware, AuthRequest } from '../middleware/authMiddleware';
 
 const router = Router();
@@ -45,8 +45,8 @@ router.get('/current', (req, res) => {
 
     const currentEvents: Record<string, Event> = {};
 
-    trips.forEach(trip => {
-      const relevantEvents = trip.events.filter(e => 
+    trips.forEach((trip: TripRuntime) => {
+      const relevantEvents = trip.events.filter((e: Event) => 
         new Date(e.timestamp).getTime() <= simTimeNum
       );
       if (relevantEvents.length > 0) {
