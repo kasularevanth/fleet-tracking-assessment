@@ -1,31 +1,48 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Fade, Zoom } from 'react-awesome-reveal';
-import { authApi } from '../services/authApi';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Fade, Zoom } from "react-awesome-reveal";
+import { authApi } from "../services/authApi";
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState<'email' | 'otp' | 'reset'>('email');
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [step, setStep] = useState<"email" | "otp" | "reset">("email");
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       await authApi.forgotPassword({ email });
-      setMessage('OTP sent to your email!');
-      setStep('otp');
+      setMessage("OTP sent to your email!");
+      setStep("otp");
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to send OTP');
+      // Handle cancelled requests (common on Render free tier cold starts)
+      if (
+        err.code === "ECONNABORTED" ||
+        err.message?.includes("canceled") ||
+        err.message?.includes("timeout")
+      ) {
+        setError(
+          "Request timed out. The server may be starting up. Please try again in a few seconds."
+        );
+      } else if (err.message?.includes("Network Error")) {
+        setError(
+          "Network error. The server may be starting up. Please try again."
+        );
+      } else {
+        setError(
+          err.response?.data?.error || "Failed to send OTP. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -33,15 +50,15 @@ const ForgotPasswordPage = () => {
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       await authApi.verifyOTP({ email, otp });
-      setMessage('OTP verified!');
-      setStep('reset');
+      setMessage("OTP verified!");
+      setStep("reset");
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Invalid OTP');
+      setError(err.response?.data?.error || "Invalid OTP");
     } finally {
       setLoading(false);
     }
@@ -49,10 +66,10 @@ const ForgotPasswordPage = () => {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
@@ -60,10 +77,10 @@ const ForgotPasswordPage = () => {
 
     try {
       await authApi.resetPassword({ email, otp, newPassword });
-      setMessage('Password reset successfully!');
-      setTimeout(() => navigate('/login'), 2000);
+      setMessage("Password reset successfully!");
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to reset password');
+      setError(err.response?.data?.error || "Failed to reset password");
     } finally {
       setLoading(false);
     }
@@ -82,12 +99,26 @@ const ForgotPasswordPage = () => {
             <Fade>
               <div className="text-center space-y-2">
                 <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full mx-auto flex items-center justify-center">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                    />
                   </svg>
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900">Reset Password</h1>
-                <p className="text-gray-600">Follow the steps to reset your password</p>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Reset Password
+                </h1>
+                <p className="text-gray-600">
+                  Follow the steps to reset your password
+                </p>
               </div>
             </Fade>
 
@@ -111,11 +142,14 @@ const ForgotPasswordPage = () => {
               </motion.div>
             )}
 
-            {step === 'email' && (
+            {step === "email" && (
               <Fade>
                 <form onSubmit={handleSendOTP} className="space-y-4">
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       Email Address
                     </label>
                     <input
@@ -135,30 +169,37 @@ const ForgotPasswordPage = () => {
                     disabled={loading}
                     className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                   >
-                    {loading ? 'Sending OTP...' : 'Send OTP'}
+                    {loading ? "Sending OTP..." : "Send OTP"}
                   </motion.button>
                 </form>
               </Fade>
             )}
 
-            {step === 'otp' && (
+            {step === "otp" && (
               <Fade>
                 <form onSubmit={handleVerifyOTP} className="space-y-4">
                   <div>
-                    <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="otp"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       Enter OTP
                     </label>
                     <input
                       id="otp"
                       type="text"
                       value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      onChange={(e) =>
+                        setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                      }
                       required
                       maxLength={6}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-center text-2xl font-bold tracking-widest"
                       placeholder="000000"
                     />
-                    <p className="text-xs text-gray-500 mt-2">Check your email for the 6-digit code</p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Check your email for the 6-digit code
+                    </p>
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -167,17 +208,20 @@ const ForgotPasswordPage = () => {
                     disabled={loading}
                     className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                   >
-                    {loading ? 'Verifying...' : 'Verify OTP'}
+                    {loading ? "Verifying..." : "Verify OTP"}
                   </motion.button>
                 </form>
               </Fade>
             )}
 
-            {step === 'reset' && (
+            {step === "reset" && (
               <Fade>
                 <form onSubmit={handleResetPassword} className="space-y-4">
                   <div>
-                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="newPassword"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       New Password
                     </label>
                     <input
@@ -190,11 +234,15 @@ const ForgotPasswordPage = () => {
                       placeholder="••••••••"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Must be 8+ characters with uppercase, lowercase, number, and special character
+                      Must be 8+ characters with uppercase, lowercase, number,
+                      and special character
                     </p>
                   </div>
                   <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="confirmPassword"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       Confirm Password
                     </label>
                     <input
@@ -214,15 +262,18 @@ const ForgotPasswordPage = () => {
                     disabled={loading}
                     className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                   >
-                    {loading ? 'Resetting...' : 'Reset Password'}
+                    {loading ? "Resetting..." : "Reset Password"}
                   </motion.button>
                 </form>
               </Fade>
             )}
 
             <p className="text-center text-sm text-gray-600">
-              Remember your password?{' '}
-              <Link to="/login" className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors">
+              Remember your password?{" "}
+              <Link
+                to="/login"
+                className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+              >
                 Sign in
               </Link>
             </p>
@@ -234,4 +285,3 @@ const ForgotPasswordPage = () => {
 };
 
 export default ForgotPasswordPage;
-

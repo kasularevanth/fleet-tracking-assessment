@@ -62,16 +62,21 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Handle timeout and network errors
-    if (error.code === "ECONNABORTED" || error.message === "Network Error") {
+    // Handle timeout, network errors, and cancelled requests
+    if (
+      error.code === "ECONNABORTED" ||
+      error.message === "Network Error" ||
+      error.message?.includes("canceled") ||
+      error.name === "CanceledError"
+    ) {
       console.error(
-        "Request timeout or network error. This may be due to Render free tier cold start."
+        "Request timeout, network error, or cancelled. This may be due to Render free tier cold start."
       );
-      return Promise.reject(
-        new Error(
-          "Request timeout. The server may be starting up. Please try again."
-        )
+      const timeoutError = new Error(
+        "Request timeout or cancelled. The server may be starting up. Please try again."
       );
+      (timeoutError as any).code = error.code || "ECONNABORTED";
+      return Promise.reject(timeoutError);
     }
 
     return Promise.reject(error);
