@@ -19,55 +19,73 @@ interface StatCardProps {
 
 const AnimatedStatCard = ({ stat, index }: StatCardProps) => {
   const [displayValue, setDisplayValue] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
-    if (stat.displayValue) {
+    if (stat.displayValue || stat.targetValue === null) {
       return;
     }
 
-    let timer: ReturnType<typeof setInterval> | null = null;
+    const startAnimation = () => {
+      if (hasAnimatedRef.current) return;
+      hasAnimatedRef.current = true;
+
+      const duration = 2000; // 2 seconds
+      const steps = 60;
+      const increment = stat.targetValue! / steps;
+      let current = 0;
+
+      timerRef.current = setInterval(() => {
+        current += increment;
+        if (current >= stat.targetValue!) {
+          setDisplayValue(stat.targetValue!);
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+        } else {
+          setDisplayValue(current);
+        }
+      }, duration / steps);
+    };
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (
-            entry.isIntersecting &&
-            !hasAnimated &&
-            stat.targetValue !== null
-          ) {
-            setHasAnimated(true);
-            const duration = 2000; // 2 seconds
-            const steps = 60;
-            const increment = (stat.targetValue as number) / steps;
-            let current = 0;
-            timer = setInterval(() => {
-              current += increment;
-              if (current >= (stat.targetValue as number)) {
-                setDisplayValue(stat.targetValue as number);
-                if (timer) clearInterval(timer);
-              } else {
-                setDisplayValue(current);
-              }
-            }, duration / steps);
+          if (entry.isIntersecting && !hasAnimatedRef.current) {
+            startAnimation();
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.1 }
     );
 
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
+    const currentCard = cardRef.current;
+    if (currentCard) {
+      // Check if already visible on mount
+      const rect = currentCard.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+
+      if (isVisible) {
+        // Start animation immediately if already visible
+        setTimeout(startAnimation, 300 + index * 100);
+      } else {
+        observer.observe(currentCard);
+      }
     }
 
     return () => {
-      if (timer) clearInterval(timer);
-      if (cardRef.current) {
-        observer.unobserve(cardRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      if (currentCard) {
+        observer.unobserve(currentCard);
       }
     };
-  }, [stat, hasAnimated]);
+  }, [stat.targetValue, stat.displayValue, index]);
 
   const formatValue = () => {
     if (stat.displayValue) return stat.displayValue;

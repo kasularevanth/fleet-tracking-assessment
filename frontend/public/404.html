@@ -1,16 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fleet Tracking Dashboard</title>
-  <script>
-    // Redirect to index.html for SPA routing
-    window.location.replace('/index.html' + window.location.pathname + window.location.search);
-  </script>
-</head>
-<body>
-  <p>Redirecting...</p>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fleet Tracking Dashboard</title>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+      // Prevent redirect loops - if URL has /index.html, clean it up
+      if (window.location.pathname.includes("/index.html")) {
+        const cleanPath =
+          window.location.pathname.replace(/\/index\.html.*$/, "") || "/";
+        window.history.replaceState(
+          {},
+          "",
+          cleanPath + window.location.search + window.location.hash
+        );
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
-
