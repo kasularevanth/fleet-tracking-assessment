@@ -4,12 +4,11 @@ import { motion } from 'framer-motion';
 import { Fade, Slide } from 'react-awesome-reveal';
 import { authApi } from '../services/authApi';
 import { useAuthStore } from '../store/authStore';
-import { Avatar, getUserInitials } from '../components/common/Avatar';
+import { Avatar } from '../components/common/Avatar';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { user, setAuth, logout } = useAuthStore();
-  const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -62,7 +61,7 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <Fade top>
+        <Fade>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -103,7 +102,7 @@ const ProfilePage = () => {
               </motion.div>
             )}
 
-            <Slide left>
+            <Slide>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
                 {/* Avatar Section */}
                 <div className="text-center">

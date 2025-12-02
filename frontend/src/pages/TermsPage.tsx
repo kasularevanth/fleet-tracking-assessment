@@ -51,7 +51,7 @@ const TermsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-teal-50">
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <Fade top>
+        <Fade>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -74,7 +74,7 @@ const TermsPage = () => {
 
             <div className="prose max-w-none space-y-8">
               {sections.map((section, index) => (
-                <Slide key={index} left delay={index * 100}>
+                <Slide key={index} delay={index * 100}>
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -88,7 +88,7 @@ const TermsPage = () => {
               ))}
             </div>
 
-            <Fade bottom delay={1000}>
+            <Fade delay={1000}>
               <div className="mt-12 p-6 bg-blue-50 rounded-lg border border-blue-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Questions?</h3>
                 <p className="text-gray-700">

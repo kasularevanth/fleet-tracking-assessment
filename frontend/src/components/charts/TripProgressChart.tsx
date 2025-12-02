@@ -17,7 +17,7 @@ interface TripProgress {
   isLoading: boolean;
 }
 
-const TripProgressChart = ({ trips, simTime, fleetMetrics }: Props) => {
+const TripProgressChart = ({ trips, simTime }: Props) => {
   const [tripProgresses, setTripProgresses] = useState<
     Map<string, TripProgress>
   >(new Map());

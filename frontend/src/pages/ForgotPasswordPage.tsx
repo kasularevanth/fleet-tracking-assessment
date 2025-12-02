@@ -79,7 +79,7 @@ const ForgotPasswordPage = () => {
       >
         <Zoom>
           <div className="bg-white rounded-2xl shadow-2xl p-8 space-y-6">
-            <Fade top>
+            <Fade>
               <div className="text-center space-y-2">
                 <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full mx-auto flex items-center justify-center">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,9 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
-import maplibregl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import { Trip } from '../../services/tripsApi';
-import { tripsApi } from '../../services/tripsApi';
-import { Event } from '../../../backend/src/models/Event';
+import { useEffect, useRef } from "react";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { Trip } from "../../services/tripsApi";
+import { tripsApi } from "../../services/tripsApi";
+
+interface Event {
+  event_id: string;
+  event_type: string;
+  timestamp: string;
+  vehicle_id: string;
+  trip_id: string;
+  location: { lat: number; lng: number };
+  movement?: { speed_kmh: number; heading_degrees?: number; moving: boolean };
+  device?: { battery_level: number; charging: boolean };
+  signal_quality?: string;
+  distance_travelled_km?: number;
+  [key: string]: any;
+}
 
 interface Props {
   trips: Trip[];
@@ -16,8 +29,6 @@ const FleetMap = ({ trips, selectedTrip, simTime, onTripClick }: Props) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markers = useRef<maplibregl.Marker[]>([]);
-  const routes = useRef<maplibregl.LineLayer[]>([]);
-  const [vehiclePositions, setVehiclePositions] = useState<Map<string, { lat: number; lng: number; status: string; speed: number }>>(new Map());
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -27,18 +38,18 @@ const FleetMap = ({ trips, selectedTrip, simTime, onTripClick }: Props) => {
       style: {
         version: 8,
         sources: {
-          'osm-tiles': {
-            type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+          "osm-tiles": {
+            type: "raster",
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
             tileSize: 256,
-            attribution: '© OpenStreetMap contributors',
+            attribution: "© OpenStreetMap contributors",
           },
         },
         layers: [
           {
-            id: 'osm-tiles',
-            type: 'raster',
-            source: 'osm-tiles',
+            id: "osm-tiles",
+            type: "raster",
+            source: "osm-tiles",
           },
         ],
       },
@@ -46,7 +57,7 @@ const FleetMap = ({ trips, selectedTrip, simTime, onTripClick }: Props) => {
       zoom: 4,
     });
 
-    map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
+    map.current.addControl(new maplibregl.NavigationControl(), "top-right");
   }, []);
 
   useEffect(() => {
@@ -58,7 +69,10 @@ const FleetMap = ({ trips, selectedTrip, simTime, onTripClick }: Props) => {
   const loadVehiclePositions = async () => {
     if (!simTime) return;
 
-    const positions = new Map<string, { lat: number; lng: number; status: string; speed: number }>();
+    const positions = new Map<
+      string,
+      { lat: number; lng: number; status: string; speed: number }
+    >();
 
     for (const trip of trips) {
       const startTime = new Date(trip.startTime).getTime();
@@ -67,8 +81,10 @@ const FleetMap = ({ trips, selectedTrip, simTime, onTripClick }: Props) => {
       if (simTime >= startTime && simTime <= endTime) {
         try {
           const events = await tripsApi.getTripEvents(trip.id, simTime);
-          const relevantEvents = events.filter((e: Event) => new Date(e.timestamp).getTime() <= simTime);
-          
+          const relevantEvents = events.filter(
+            (e: Event) => new Date(e.timestamp).getTime() <= simTime
+          );
+
           if (relevantEvents.length > 0) {
             const lastEvent = relevantEvents[relevantEvents.length - 1];
             const status = trip.status;
@@ -85,7 +101,10 @@ const FleetMap = ({ trips, selectedTrip, simTime, onTripClick }: Props) => {
             if (relevantEvents.length > 1 && map.current) {
               const coordinates = relevantEvents
                 .filter((e: Event) => e.location)
-                .map((e: Event) => [e.location.lng, e.location.lat] as [number, number]);
+                .map(
+                  (e: Event) =>
+                    [e.location.lng, e.location.lat] as [number, number]
+                );
 
               if (coordinates.length > 1) {
                 const sourceId = `route-${trip.id}`;
@@ -101,12 +120,12 @@ const FleetMap = ({ trips, selectedTrip, simTime, onTripClick }: Props) => {
 
                 // Add new route
                 map.current.addSource(sourceId, {
-                  type: 'geojson',
+                  type: "geojson",
                   data: {
-                    type: 'Feature',
+                    type: "Feature",
                     properties: {},
                     geometry: {
-                      type: 'LineString',
+                      type: "LineString",
                       coordinates,
                     },
                   },
@@ -114,16 +133,17 @@ const FleetMap = ({ trips, selectedTrip, simTime, onTripClick }: Props) => {
 
                 map.current.addLayer({
                   id: layerId,
-                  type: 'line',
+                  type: "line",
                   source: sourceId,
                   layout: {
-                    'line-join': 'round',
-                    'line-cap': 'round',
+                    "line-join": "round",
+                    "line-cap": "round",
                   },
                   paint: {
-                    'line-color': selectedTrip === trip.id ? '#3b82f6' : '#94a3b8',
-                    'line-width': selectedTrip === trip.id ? 4 : 2,
-                    'line-opacity': 0.6,
+                    "line-color":
+                      selectedTrip === trip.id ? "#3b82f6" : "#94a3b8",
+                    "line-width": selectedTrip === trip.id ? 4 : 2,
+                    "line-opacity": 0.6,
                   },
                 });
               }
@@ -135,44 +155,53 @@ const FleetMap = ({ trips, selectedTrip, simTime, onTripClick }: Props) => {
       }
     }
 
-    setVehiclePositions(positions);
     updateMarkers(positions);
   };
 
-  const updateMarkers = (positions: Map<string, { lat: number; lng: number; status: string; speed: number }>) => {
+  const updateMarkers = (
+    positions: Map<
+      string,
+      { lat: number; lng: number; status: string; speed: number }
+    >
+  ) => {
     if (!map.current) return;
 
     // Clear existing markers
-    markers.current.forEach(marker => marker.remove());
+    markers.current.forEach((marker) => marker.remove());
     markers.current = [];
 
     positions.forEach((position, tripId) => {
-      const trip = trips.find(t => t.id === tripId);
+      const trip = trips.find((t) => t.id === tripId);
       if (!trip) return;
 
       const isSelected = selectedTrip === tripId;
-      const hasAlert = trip.status === 'technical_issues' || position.speed > 100;
+      const hasAlert =
+        trip.status === "technical_issues" || position.speed > 100;
 
-      const el = document.createElement('div');
-      el.className = 'vehicle-marker';
+      const el = document.createElement("div");
+      el.className = "vehicle-marker";
       el.style.cssText = `
-        width: ${isSelected ? '40px' : '32px'};
-        height: ${isSelected ? '40px' : '32px'};
+        width: ${isSelected ? "40px" : "32px"};
+        height: ${isSelected ? "40px" : "32px"};
         border-radius: 50%;
-        background: ${hasAlert ? '#ef4444' : isSelected ? '#3b82f6' : '#10b981'};
+        background: ${
+          hasAlert ? "#ef4444" : isSelected ? "#3b82f6" : "#10b981"
+        };
         border: 3px solid white;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: ${isSelected ? '20px' : '16px'};
+        font-size: ${isSelected ? "20px" : "16px"};
         cursor: pointer;
         transition: all 0.3s;
       `;
-      el.innerHTML = '🚛';
-      el.title = `${trip.name} - ${trip.vehicle_id} - ${position.speed.toFixed(0)} km/h`;
+      el.innerHTML = "🚛";
+      el.title = `${trip.name} - ${trip.vehicle_id} - ${position.speed.toFixed(
+        0
+      )} km/h`;
 
-      el.addEventListener('click', () => {
+      el.addEventListener("click", () => {
         onTripClick?.(tripId);
       });
 
@@ -194,9 +223,12 @@ const FleetMap = ({ trips, selectedTrip, simTime, onTripClick }: Props) => {
   };
 
   return (
-    <div ref={mapContainer} className="w-full h-full rounded-lg" style={{ minHeight: '500px' }} />
+    <div
+      ref={mapContainer}
+      className="w-full h-full rounded-lg"
+      style={{ minHeight: "500px" }}
+    />
   );
 };
 
 export default FleetMap;
-
